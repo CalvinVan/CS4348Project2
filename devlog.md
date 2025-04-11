@@ -1,0 +1,55 @@
+# Project 2 Develog Calvin Van CTV210001 CS4348.003
+
+## April 10th 4:20 PMs
+Begin reading project requirements to gain an idea of the steps and functionalities needed.
+
+### Project Requirement Notes
+Reading the description we have a couple of entities that can be represented as threads / areas of access that we are concern with
+- We have 3 tellers (could be process threads or something that take in requests)
+- We have customers which could be inputs / calls to access the thread. So some intuition is that the main program managing the threads can send the customers to the available threads when there is one. The customers are also able to make 2 type of requests withdraw and deposit which ii'll delve into more later. There are 50 customers and once they have been served, they leave the bank and the bank is "closed" which means the program is over.
+- There is a safe in which only 2 tellers / threads are allowed in. Furthermore, if they want to go into the safe to withdraw money, they must ask the bank manager / the main program / some master thread? if they are allowed into the safe to withdraw money. However, the manager can only talk to one thread at a time.
+
+Since we are using python, we will be utilizing the threading module and threading.semaphore for syncing.
+
+The program will launch 3 threads for tellers and 50 threads for customers.
+
+The shared resources will be the safe and the manager which should be protected by semaphores Other semaphores should also be needed to sync the behavior of the threads. FOr example, the customer should not leave until the Teller has finished thier transation.
+
+Some Teller Thread details
+1.  The teller has a unique id and there are 3 of them and the steps below outline their logic
+- Teller will let everyone know if it is ready to serve
+- **WAIT** for a customer to approach it in the mean time
+- when **SIGNALED** by a customer, teller requests transaction type
+- **WAIT** until the customer gives a transaction
+- If transaction is a withdrawal, go to manager **SIGNAL** Manager should always give permission but there is time interacting with teller. To represent this, the teller should **SLEEP** for a random duration from 5 to 30 seconds after signaling to manager?
+- Afterwards thread is allowed to access the safe, It should **WAIT** if it is occupied by the two tellers
+- Once in the safe, the teller will physically perform transaction (represented by **SLEEPING** for a random duration between 10 and 50 ns)
+- **SIGNAL** customer saying that the transaction is done
+- **WAIT** until the customer leaves the teller and become available again **SIGNAL**
+
+
+Customer Details
+There are 50 customers and they do the following actions
+- The customer randomly decides what transaction to perform: deposit or withdrawal
+- The customer then **WAITS** between 0-100ms
+- The customer then enters the bank **SIGNAL?** The door only allows two customers to enter at a time
+- The customer wil then get in line. If there is an available teller then the customer will go to said teller else it will **WAIT** until it is called and then go the teller
+- It should then give its id to the teller
+-The customer will **WAIT** for the teller to ask for the transaction
+- THe customer will tell the teller the transaction
+- The customer will **WAIT** for the teller to complete transaction
+- The customer will leave the bank through the door and simulation (end thread)
+
+
+Output:
+The teller and customer threads print out a line for each simulated action they are performing and use the format
+{Thread Type ID} [Thready_TYPE ID] : MSG
+
+Example:
+Customer 10 [Teller 0]: selects teller
+
+If there is any block for an amount of time there are 2 lines.
+THe first line is the action being taken before the wait
+The other is after the wait
+
+if
