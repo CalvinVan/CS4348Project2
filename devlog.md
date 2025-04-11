@@ -51,5 +51,36 @@ Customer 10 [Teller 0]: selects teller
 If there is any block for an amount of time there are 2 lines.
 THe first line is the action being taken before the wait
 The other is after the wait
+So it should be 
+Thread Type ID: Waiting for action
+Thread Type ID: Done Wait and Action Completed
 
-if
+
+
+## April 11th 6:00 PM
+### Continue highlighint requirements
+
+If there is a shared resource being accessed (the manager or safe), then 3 lines are outputted.
+
+1. Indicate the teller going to the resources
+2. Indicate the thread that is using the resource
+3. Inidicate when the thread is done using the resource.
+
+Let's outline the line of actions taken
+
+1. Initialize the teller and customer threads
+2. Initialize the shared resources that is the safe and the manager
+
+3. Tellers will need to signal customer threads that they are waiting for a customer
+3b. Customers will have to be entered into the system and randomly decide between deposit and withdrawal and then wait before entering the bank in which they can get in line.
+
+Continue onwards as I want to start some coding now.
+
+Start setting up the threads and semaphore states.
+
+As for how I will setup the semaphores, for more open shared resources that can be accessed by the teller threads, I will initialize them through the threading.semaphore(# of allowed threads)
+
+As for the teller semaphores, they need to be treated differently as each teller needs to be its own resource so an array will be needed to hold the semaphore for each teller which has a number of conditions mentioned in the code of the rogram.
+
+
+In addition to the state of the semaphores, I will look into using a variable to hold the states such as the teller who has to hold onto the transaction type that it has and the customer ID, an array filled with dictionaries keyed by the customerID and transaction string will work for easy access and the number of available tellers.
