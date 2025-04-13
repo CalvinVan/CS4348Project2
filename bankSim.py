@@ -20,10 +20,13 @@ doorAccess = threading.Semaphore(MAX_CUSTOMERS_ENTER) #Semaphore / shared resour
 #Set up customer line using array instead of queue
 customerLine = []
 lineLock = threading.Lock() #Want to use a lock to manage the lock safely between the threads
+lineCondition = threading.Condition(lineLock)
 
 #Setting up structure to indicate available tellers
-availableTellers = set()
-tellersLock = threading.Lock()
+tellerAvailable = [threading.Event() for _ in range(NUM_TELLERS)] #Event array indicating to customers when there could be a teller available
+tellerSelected = [threading.Event() for _ in range(NUM_TELLERS)] #Event Array indicating when the teller is selected by a customer
+tellerBusy = [False] * NUM_TELLERS
+tellerLock = threading.Lock()
 
 #Set up semaphores for the tellers 
 # Now because each teller is its own resource, we will need an array to hold each semaphore
@@ -36,21 +39,21 @@ The following are the conditions that tellers need to keep track of.
 4. Whether they have been provided a transaction by the customer
 5. Whether the transaction has been completed
 6. Ehether the customer has left yet to open again
-
 '''
 
 tellersReadyCount = threading.Semaphore(0) # Count of tellers that are ready to serve
-tellerCustomerAssigned = [threading.Semaphore(0) for _ in range(NUM_TELLERS)]
-tellerTransactionReq = [threading.Semaphore(0) for _ in range(NUM_TELLERS)]
-tellerTransactionProv = [threading.Semaphore(0) for _ in range(NUM_TELLERS)]
-tellerTransactionCompleted = [threading.Semaphore(0) for _ in range(NUM_TELLERS)]
-customerDepart = [threading.Semaphore(0) for _ in range(NUM_TELLERS)]
+tellerCustomerAssigned = [threading.Semaphore(0) for _ in range(NUM_TELLERS)] # This is for when the teller has a customer and is ready
+tellerTransactionReq = [threading.Semaphore(0) for _ in range(NUM_TELLERS)] #Teller is requesting transaction
+tellerTransactionProv = [threading.Semaphore(0) for _ in range(NUM_TELLERS)] #Teller has been given transaction
+tellerTransactionCompleted = [threading.Semaphore(0) for _ in range(NUM_TELLERS)] #Transaction is completed and waiting for customer to leave
+customerDepart = [threading.Semaphore(0) for _ in range(NUM_TELLERS)] #Customer has left and can reenter ready state afterwards
 
 
 #State Variables
 tellerDictionaryArr = [{"customerID": None, "transaction": None} for _ in range(NUM_TELLERS)]
 customerServed = 0 #Counter to manage how many customers have been served so far
 customerServedLock = threading.Lock() #Lock to safely change the customerServed var
+allServed = threading.Event() #Initialzing a final event which indicates when all the customers have been served and program can end
 
 #Need assignment events indicating when a customer is assigned and an array indicating which teller the customer was assigned
 CustomerAssignedEventArr = [threading.Event() for _ in range(NUM_CUSTOMERS)] #May change this up later as customers pick a teller.
@@ -76,11 +79,21 @@ def tellerThread(tellerID):
     if tellersReadyCount._value == NUM_TELLERS: #check for the value of our semaphore and if all the tellers are ready that means we can open the bank
       bankOpen.set()
   
-  #Next we want to signal that the tellers are available to serve
-  with tellersLock:
-    availableTellers.add(tellerID)
+  #Now we can modify our event array and setting / signaling that the tellers are available
+  tellerAvailable[tellerID].set()
 
-  #now we will loop continuously till all customers have been served but will do later
+  while not allServed.is_set():
+    tellerSelected[tellerID].wait()
+    tellerSelected[tellerID].clear()
+
+    tellerCustomerAssigned[tellerID].wait()
+    tellerCustomerAssigned[tellerID].clear()
+
+    customerID = tellerDictionaryArr[tellerID]["customerID"]
+  
+
+          
+          
   
 def customerThread(customerID):
   #First thing seen on the sample output is that each customer will randomly pick a transaction type
@@ -104,14 +117,35 @@ def customerThread(customerID):
   doorAccess.acquire() #Customer will then check the semaphore condition of allowing only 2 resources into the door at a time before entering into the bank
   print(f"Customer {customerID} []: entering bank.")
 
+  doorAccess.release() #Make more "space" in the door access semaphore to allow other threads to enter
+
   #After we enter the bank, we need to enter the line
   print(f"Customer {customerID} []: getting in line.")
 
-  with lineLock: #Adding the customer thread into the array which is our line
-    customerLine.append(customerID)
- 
-  doorAccess.release() #Make more "space" in the door access semaphore to allow other threads to enter
+  with lineCondition: #while there is some condition of being in line we will continue forwards
+    customerLine.append(customerID) #Add thread into the line
 
+    while True: #while we are in line, we need to check if are at the front of the line
+      
+      if customerLine[0] != customerID: #If we are not then we will wait and continue till we are at the front again
+        lineCondition.wait()
+        continue
+      
+      print(f"Customer {customerID} []: selecting a teller.")
+
+      #logic to select a teller
+
+      selectedTeller = None
+      for tellerID in range(NUM_TELLERS): # we will check if any of the tellers are available
+        if tellerAvailable[tellerID].is_set():
+          with tellerLock: #using teller lock to safely modify the conditions and assign teller
+            if not tellerBusy[tellerID]:
+
+
+  
+
+
+  
  
 
 

@@ -101,3 +101,8 @@ For now I will have the thread functions be bare minimum to allow for some initi
 - Setup end print statement
 -  Start working on setting up the teller and customer threads to initialize their states and transaction types
 
+
+## April 13 12:00 PM
+## Start setting up thread communication between the tellers and customers
+- I decided to remove the use of a queue and simplify it by using an array and set instead to manage the customers in line and the tellers that are available.
+- Realizing that I was setting it up to where the events handeled it such that the teller was selecting the customer but after looking at the sample output that the customer is selecting the teller and not the other way around so need to modify program and its events
