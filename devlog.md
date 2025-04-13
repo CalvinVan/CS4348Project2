@@ -92,3 +92,12 @@ Will start setting up the arrays to manage our teller and customer threads.
 
 For now I will have the thread functions be bare minimum to allow for some initializationa nd will focus on communication afterwards.
 
+
+**SPECIAL NOTE** I forgot to mentioned but somewhere when brainstorming up how to manage customers to properly enter and exit out of the lines is to use a queue which is why queue was imported ahead of time but might remove this later as I can possibly sync the teller and customer threads without having to use it.
+
+## April 12th 10:05PM 
+## Recontinue working on setting up threads
+- Setup join functions for threads to finish executing and waiting properly
+- Setup end print statement
+-  Start working on setting up the teller and customer threads to initialize their states and transaction types
+
