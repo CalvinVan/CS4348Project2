@@ -84,3 +84,11 @@ As for the teller semaphores, they need to be treated differently as each teller
 
 
 In addition to the state of the semaphores, I will look into using a variable to hold the states such as the teller who has to hold onto the transaction type that it has and the customer ID, an array filled with dictionaries keyed by the customerID and transaction string will work for easy access and the number of available tellers.
+
+
+## April 12th 6:50 PM
+## Start setting up main function to initialize threads
+Will start setting up the arrays to manage our teller and customer threads.
+
+For now I will have the thread functions be bare minimum to allow for some initializationa nd will focus on communication afterwards.
+

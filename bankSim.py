@@ -41,4 +41,37 @@ customerDepart = [threading.Semaphore(0) for _ in range(NUM_TELLERS)]
 tellerDictionaryArr = [{"customerID": None, "transaction": None} for _ in range(NUM_TELLERS)]
 tellersReadyCount = threading.Semaphore(0)
 
+#Thread Function Definition
+def tellerThread(tellerID):
+  print("HI")
+
+def customerThread(customerID):
+  print("HI")
+
+
+def main():
+  #First we want an array to hold our teller threads and our customer threads
+
+  #tellerThread intialization. For now I will make basic functions to handle the the respective teller and customer threads
+
+  tellerThreadsArr = [] #Var to manage the teller threads
+
+  for i in range(NUM_TELLERS):
+    t = threading.Thread(target=tellerThread, args=(i,)) # Here we initalize the thread saying that the thread is correlated with the function and passing in i as the teller thread's id
+    tellerThreadsArr.append(t) #append the new thread to the array
+    t.start()  #Start the thread
+  
+  time.sleep(0.1) #Here I am just having a short pause so that the tellers can get ready before initializing customers
+
+  customerThreadsArr = []
+  for i in range(NUM_CUSTOMERS):
+    t = threading.Thread(target = customerThread, args=(i,))
+    customerThreadsArr.append(t)
+    t.start()
+
+
+
+
+if __name__ == "__main__":
+  main()
 
