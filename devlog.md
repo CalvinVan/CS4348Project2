@@ -106,3 +106,17 @@ For now I will have the thread functions be bare minimum to allow for some initi
 ## Start setting up thread communication between the tellers and customers
 - I decided to remove the use of a queue and simplify it by using an array and set instead to manage the customers in line and the tellers that are available.
 - Realizing that I was setting it up to where the events handeled it such that the teller was selecting the customer but after looking at the sample output that the customer is selecting the teller and not the other way around so need to modify program and its events
+
+## April 13 1:40 PM
+## Continuing on working again
+- Look to finishing up the customer thread first since it's mainly waiting for the transaction so its the easier one to finish first
+
+## Finished up program Time: 4:10 PM
+
+- Some problems and notes about the challenges
+- Once things were rolling, it was easy to set up accessing the safe and manager as they were semaphores so it was just a constant update of the event states which made things a lot easier. However, one big challenge that came with using so many events was the biggest issue at the end which was figuring out how to avoid deadlock as the output would often get stuck in deadlock because the program saw that the event that all customers were served was flagged which meant that while a teller was able to leave, the other tellers may have been stuck waiting. A solution was that before we joined all the teller threads to mark the end of the program is to simply set all of the possible events that tellers could have been waiting on as they can now get ready to leave
+- Another issue that I came accross was how the tellers were not leaving at the same time so I looked into implementing a barrier event so that the threads will have to wait until the barrier got signaled that there were 3 teller threads waiting on it in order to print the output that the teller threads were leaving.
+- Finally another thing was how to manage the line of customers which ended up not being too difficult of a task as we can utilize an array and a line condition indicating to the thread of some line that needs to be checked and updated and have it only be allowed to look for a teller if it is at the front of the line.
+- Something that helped was the use of locks and events which ensured that the threads safely accessed resources properly without worrying about the race conditions.
+- Some retrospective thoughts is that the program could probably be done without having to need as many extra conditions/events to mark when a thread can proceed as the many uses of events and locks means a greater risk of deadlock but does ensure more security.
+
